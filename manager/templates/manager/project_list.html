@@ -1,0 +1,38 @@
+{% extends 'manager/base.html' %}
+
+{% block title %}Project List{% endblock %}
+
+{% block content %}
+    <h1>Project List</h1>
+    <ul>
+        {% for project in projects %}
+            <li>
+                <a href="{% url 'project_detail' id=project.id %}">{{ project.title }}</a>
+                <p><strong>Description: </strong>
+                {{ project.description|truncatewords:20 }}</p>
+                <ul>
+                    {% for task in project.tasks.all %}
+                        <li {% if task.is_overdue %}class="overdue-task"{% endif %}>
+                        <div class="task-entry">
+                            <a href="{% url 'task_detail' task_id=task.id %}">{{ task.title }}</a>
+                            {% if task.is_overdue %}
+                                <span class="overdue-warning">(Overdue)</span>
+                            {% endif %}
+                        </div>
+                        </li>
+                    {% empty %}
+                        <li>No tasks found.</li>
+                    {% endfor %}
+                </ul>
+                <button type="button" class="button-link" onclick="location.href='{% url 'project_edit' id=project.id %}';">Edit Project</button>
+                <button type="button" class="button-link" onclick="location.href='{% url 'project_delete' id=project.id %}';">Delete Project</button>       
+                <button type="button" onclick="location.href='{% url 'task_create' project_id=project.id %}';">Add New Task</button>
+            </li>
+        {% empty %}
+            <li>No projects found.</li>
+        {% endfor %}
+    </ul>
+    
+    <button type="button" onclick="location.href='{% url 'project_create' %}';">Create New Project</button>
+
+{% endblock %}

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Detail</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+<header>
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="project_list.html">Projects</a></li>
+            <li><a href="project_form.html">New Project</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main>
+    <div id="project-container">
+        <h1 id="project-title"></h1>
+        <p id="project-description"></p>
+
+        <button id="edit-project-btn">Edit Project</button>
+        <button id="delete-project-btn">Delete Project</button>
+        <button id="add-task-btn">Add Task</button>
+
+        <h2>Tasks</h2>
+        <ul id="task-list">
+            <!-- Tasks will be dynamically inserted here -->
+        </ul>
+    </div>
+</main>
+
+<footer>
+    <p>&copy;2025 O.Parshakov</p>
+    <p>Dream it. Build it.</p>
+</footer>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const projectId = params.get('id');
+
+if (!projectId) {
+    alert('No project ID specified!');
+    window.location.href = 'project_list.html';
+}
+
+const projectTitle = document.getElementById('project-title');
+const projectDescription = document.getElementById('project-description');
+const taskList = document.getElementById('task-list');
+const editProjectBtn = document.getElementById('edit-project-btn');
+const deleteProjectBtn = document.getElementById('delete-project-btn');
+const addTaskBtn = document.getElementById('add-task-btn');
+
+// Fetch project info
+axios.get(`/api/projects/${projectId}`)
+    .then(response => {
+        const project = response.data;
+        projectTitle.textContent = project.title;
+        projectDescription.textContent = project.description || 'No description provided.';
+        loadTasks(projectId);        
+    })
+    .catch(error => {
+        console.error(error);
+        alert('Failed to load project.');
+        window.location.href = 'project_list.html';
+    });
+
+// Edit project
+editProjectBtn.addEventListener('click', () => {
+    window.location.href = `project_form.html?id=${projectId}`;
+});
+
+// Delete project
+deleteProjectBtn.addEventListener('click', () => {
+    if (confirm('Are you sure you want to delete this project and all its tasks?')) {
+        axios.delete(`/api/projects/${projectId}`)
+            .then(() => {
+                alert('Project deleted.');
+                window.location.href = 'project_list.html';
+            })
+            .catch(error => {
+                console.error(error);
+                alert('Failed to delete project.');
+            });
+    }
+});
+
+// Add, edit, delete a task
+addTaskBtn.addEventListener('click', () => {
+    window.location.href = `task_form.html?project_id=${projectId}`;
+});
+
+//function editTask(taskId) {
+//    window.location.href = `task_form.html?task_id=${taskId}`;
+//}
+function editTask(taskId) {
+    const params = new URLSearchParams(window.location.search);
+    const projectId = params.get('id');
+    window.location.href = `task_form.html?task_id=${taskId}&project_id=${projectId}`;
+}
+
+function deleteTask(taskId) {
+    if (confirm('Are you sure you want to delete this task?')) {
+        axios.delete(`/api/tasks/${taskId}`)
+            .then(() => {
+                alert('Task deleted.');
+                location.reload();  // Reload page to show updated task list
+            })
+            .catch(error => {
+                console.error(error);
+                alert('Failed to delete task.');
+            });
+    }
+}
+
+function loadTasks(projectId) {
+    taskList.innerHTML = '<li>Loading tasks...</li>';
+    axios.get(`http://127.0.0.1:8000/api/tasks/?project=${projectId}`)
+        .then(response => {
+            const tasks = response.data;
+            taskList.innerHTML = ''; // Clear loading message
+            if (tasks.length > 0) {
+                tasks.forEach(task => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <a href="task_detail.html?id=${task.id}">
+                            <strong>${task.title}</strong>
+                        </a> — ${task.status} (Due: ${task.due_date})
+                        <button onclick="editTask(${task.id})">Edit</button>
+                        <button onclick="deleteTask(${task.id})">Delete</button>
+                    `;
+                    if (task.status !== "done" && new Date(task.due_date) < new Date()) {
+                        li.classList.add('overdue-task');
+                    }
+                    taskList.appendChild(li);
+                });
+            } else {
+                taskList.innerHTML = "<li>No tasks yet.</li>";
+            }
+        })
+        .catch(error => {
+            console.error('Error loading tasks:', error);
+            taskList.innerHTML = '<li class="overdue-warning">Failed to load tasks.</li>';
+        });
+}
+</script>
+
+</body>
+</html>

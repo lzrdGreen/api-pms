@@ -1,0 +1,8 @@
+# Always use LF (Unix-style) line endings
+* text=auto eol=lf
+
+# Mark shell scripts explicitly
+*.sh text eol=lf
+*.env text eol=lf
+Dockerfile text eol=lf
+*.py text eol=lf

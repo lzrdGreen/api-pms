@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create/Edit Task</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+<header>
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="project_list.html">Projects</a></li>
+            <li><a href="project_form.html">New Project</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main>
+    <h1 id="form-title">Create/Edit Task</h1>
+
+    <form id="task-form">
+        <label for="title">Title:</label><br>
+        <input type="text" id="title" name="title" required><br><br>
+
+        <label for="description">Description:</label><br>
+        <textarea id="description" name="description" rows="4"></textarea><br><br>
+
+        <label for="start_date">Start Date:</label><br>
+        <input type="date" id="start_date" name="start_date" required><br><br>
+
+        <label for="due_date">Due Date:</label><br>
+        <input type="date" id="due_date" name="due_date" required><br><br>
+
+        <label for="status">Status:</label><br>
+        <select id="status" name="status">
+            <option value="todo">To Do</option>
+            <option value="in_progress">In Progress</option>
+            <option value="done">Done</option>
+        </select><br><br>
+
+        <button type="submit">Save Task</button>
+    </form>
+</main>
+
+<footer>
+    <p>&copy; 2025 O.Parshakov</p>
+    <p>Dream it. Build it.</p>
+</footer>
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const projectIdParam = urlParams.get('project_id');
+    const taskId = urlParams.get('task_id');
+    
+    let currentProjectId = projectIdParam;  // may get overwritten when editing
+    
+    if (!projectIdParam && !taskId) {
+        alert("Missing project information. Cannot create or edit task.");
+        window.location.href = 'project_list.html';
+    }
+    
+    // Pre-fill form if editing existing task
+    if (taskId) {
+        document.getElementById('form-title').innerText = 'Edit Task';
+        axios.get(`/api/tasks/${taskId}`)
+            .then(response => {
+                const task = response.data;
+                currentProjectId = task.project;  // store project id from task
+                document.getElementById('title').value = task.title;
+                document.getElementById('description').value = task.description || '';
+                document.getElementById('start_date').value = task.start_date;
+                document.getElementById('due_date').value = task.due_date;
+                document.getElementById('status').value = task.status;
+            })
+            .catch(error => {
+                console.error('Error loading task:', error);
+                alert('Failed to load task data.');
+            });
+    }
+    
+    document.getElementById('task-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+    
+        const taskData = {
+            title: document.getElementById('title').value,
+            description: document.getElementById('description').value,
+            start_date: document.getElementById('start_date').value,
+            due_date: document.getElementById('due_date').value,
+            status: document.getElementById('status').value,
+            project: currentProjectId,  // always ensure valid project ID is sent
+        };
+    
+        if (taskId) {
+            // Editing existing task
+            axios.put(`/api/tasks/${taskId}/`, taskData)
+                .then(() => {
+                    window.location.href = `project_detail.html?id=${currentProjectId}`;
+                })
+                .catch(error => {
+                    console.error('Error updating task:', error);
+                    showApiErrors(error);
+                });
+        } else {
+            // Creating new task
+            axios.post('/api/tasks/', taskData)
+                .then(() => {
+                    window.location.href = `project_detail.html?id=${currentProjectId}`;
+                })
+                .catch(error => {
+                    console.error('Error creating task:', error);
+                    showApiErrors(error);
+                });
+        }
+    });
+    
+    function showApiErrors(error) {
+        if (error.response && error.response.data) {
+            const errorData = error.response.data;
+            let messages = [];
+    
+            for (const [field, message] of Object.entries(errorData)) {
+                if (Array.isArray(message)) {
+                    messages.push(`${field}: ${message.join(', ')}`);
+                } else {
+                    messages.push(`${field}: ${message}`);
+                }
+            }
+    
+            alert('Failed to save task:\n' + messages.join('\n'));
+        } else {
+            alert('Failed to save task. Please try again.');
+        }
+    }
+    </script>
+    
+
+</body>
+</html>

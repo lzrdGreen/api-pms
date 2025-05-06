@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Detail</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+
+<header>
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="project_list.html">Projects</a></li>
+            <li><a href="project_form.html">New Project</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main>
+    <div id="task-container">
+        <h1 id="task-title">Loading...</h1> <div id="task-details-container">
+            </div>
+        <button id="edit-task-btn">Edit Task</button>
+        <button id="back-to-project-btn">Back to Project</button>
+    </div>
+</main>
+
+<footer>
+    <p>&copy;2025 O.Parshakov</p>
+    <p>Dream it. Build it.</p>
+</footer>
+
+<script>
+    // Get task ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const taskId = urlParams.get('id');
+    
+    if (!taskId) {
+        alert('No task ID specified!');
+        window.location.href = 'project_list.html';
+    }
+    
+    const taskTitleElement = document.getElementById('task-title'); // Get the H1 element
+    const taskDetailsContainer = document.getElementById('task-details-container');
+    const editTaskBtn = document.getElementById('edit-task-btn');
+    const backToProjectBtn = document.getElementById('back-to-project-btn');
+    
+    // Fetch task info
+    axios.get(`/api/tasks/${taskId}`)
+        .then(response => {
+            const taskData = response.data;
+            taskDetailsContainer.innerHTML = ''; // Clear any previous content
+            taskTitleElement.textContent = taskData.title;
+
+            for (const [key, value] of Object.entries(taskData)) {
+                if (key === 'id' || key === 'title') {
+                    continue;
+                }
+
+                const p = document.createElement('p');
+                let displayValue = value;
+
+                if (key === 'due_date') { // Corrected to 'due_date'
+                    const today = new Date();
+                    const dueDate = new Date(value); //  value is the dueDate string from API
+
+                    if (dueDate < today && taskData.status !== 'done') {
+                        p.classList.add('overdue-task'); // Apply the class
+                        console.log("Task is overdue!");  //for debugging
+                    }
+                    displayValue = value; // Keep original value for display
+                }
+
+                if (key === 'project') {
+                    axios.get(`/api/projects/${value}`)
+                        .then(projectResponse => {
+                            const projectTitle = projectResponse.data.title;
+                            const p = document.createElement('p');
+                            const displayValue = `<a href="project_detail.html?id=${value}">${projectTitle}</a>`;
+                            p.innerHTML = `<strong>Project:</strong> <span>${displayValue}</span>`;
+                            taskDetailsContainer.appendChild(p);
+                        })
+                        .catch(error => {
+                            console.error("Error fetching project title", error);
+                            const p = document.createElement('p');
+                            const displayValue = "Unknown Project";
+                            p.innerHTML = `<strong>Project:</strong> <span>${displayValue}</span>`;
+                            taskDetailsContainer.appendChild(p);
+                        });
+                    continue;
+                }                
+
+                p.innerHTML = `<strong>${key}:</strong> <span>${displayValue}</span>`;
+                taskDetailsContainer.appendChild(p);
+            }
+            backToProjectBtn.setAttribute('data-project-id', taskData.project);
+        })
+        .catch(error => {
+            console.error(error);
+            alert('Failed to load task.');
+            window.location.href = 'project_list.html';
+        });
+    
+    // Edit task
+    editTaskBtn.addEventListener('click', () => {
+        window.location.href = `task_form.html?task_id=${taskId}`;
+    });
+    
+    // Back to project
+    backToProjectBtn.addEventListener('click', (e) => {
+        const projectId = backToProjectBtn.getAttribute('data-project-id');
+        if (projectId) {
+            window.location.href = `project_detail.html?id=${projectId}`;
+        } else {
+            window.location.href = 'project_list.html';
+        }
+    });
+</script>
+</body>
+</html>

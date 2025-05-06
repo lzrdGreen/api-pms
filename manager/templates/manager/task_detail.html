@@ -1,0 +1,23 @@
+{% extends 'manager/base.html' %}
+
+{% block title %}{{ task.title }} Details{% endblock %}
+
+
+{% block content %}
+    <h1>{{ task.title }}</h1>
+    <p>Description: {{ task.description }}</p>
+    <p>
+        Due Date:
+        <span {% if task.is_overdue %}class="overdue-warning"{% endif %}>
+            {{ task.due_date }}
+            {% if task.is_overdue %}(Overdue){% endif %}
+        </span>
+    </p>
+    <p>Start Date: {{ task.start_date }}</p>
+    <p>Status: {{ task.status }}</p>
+
+    
+    
+    <button type="button" onclick="location.href='{% url 'task_edit' task_id=task.id %}';">Edit Task</button>
+    <button type="button" onclick="location.href='{% url 'project_detail' id=task.project.id %}';">Back to Project</button>
+{% endblock %}

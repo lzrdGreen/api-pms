@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project List</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+
+<header>
+  <nav>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="project_list.html">Projects</a></li>
+      <li><a href="project_form.html">New Project</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main>
+  <h1 style="text-align: center;">Project List</h1>
+
+  <div id="projects-container" style="max-width: 800px; margin: 0 auto;"></div>
+
+  <div style="text-align: center; margin-top: 30px;">
+    <button onclick="window.location.href='project_form.html'">Create New Project</button>
+  </div>
+
+</main>
+
+<footer>
+  <p>&copy;2025 O.Parshakov</p>
+  <p>Dream it. Build it.</p>
+</footer>
+
+<script>
+  const container = document.getElementById('projects-container');
+
+  function loadProjects() {
+    container.innerHTML = '<p>Loading projects...</p>';
+
+    axios.get('http://127.0.0.1:8000/api/projects/')
+      .then(response => {
+        const projects = response.data;
+        if (projects.length === 0) {
+          container.innerHTML = '<p>No projects found. Create a new one!</p>';
+          return;
+        }
+
+        container.innerHTML = '';
+
+        projects.forEach(project => {
+          const projectDiv = document.createElement('div');
+          projectDiv.className = 'project-item';
+          projectDiv.style.backgroundColor = '#fff';
+          projectDiv.style.padding = '15px';
+          projectDiv.style.marginBottom = '15px';
+          projectDiv.style.border = '1px solid #ccc';
+          projectDiv.style.borderRadius = '8px';
+          projectDiv.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
+      
+          // Create list of tasks under the project
+          let tasksHtml = '';
+          if (project.tasks && project.tasks.length > 0) {
+              tasksHtml += '<ul>';
+              project.tasks.forEach(task => {
+                tasksHtml += `<li><a href="task_detail.html?id=${task.id}">${task.title}</a></li>`;
+              });
+              tasksHtml += '</ul>';
+          } else {
+              tasksHtml = '<p style="color: #888;">No tasks yet.</p>';
+          }
+      
+          projectDiv.innerHTML = `
+              <h2><a href="project_detail.html?id=${project.id}">${project.title}</a></h2>
+              <p>${project.description || '(No description)'}</p>
+      
+              <div style="margin-top: 10px;">
+                  <strong>Tasks:</strong>
+                  ${tasksHtml}
+              </div>
+      
+              <div style="margin-top: 10px;">
+                  <button onclick="addTask(${project.id})">Add Task</button>
+                  <button onclick="editProject(${project.id})">Edit Project</button>
+                  <button onclick="deleteProject(${project.id}, '${project.title}')">Delete Project</button>
+              </div>
+          `;
+      
+          container.appendChild(projectDiv);
+      });
+      
+      })
+      .catch(error => {
+        console.error('Error loading projects:', error);
+        container.innerHTML = '<p class="overdue-warning">Failed to load projects.</p>';
+      });
+  }
+
+  function addTask(projectId) {    
+    window.location.href = `task_form.html?project_id=${projectId}`;
+  }
+
+  function editProject(projectId) {
+    window.location.href = `project_form.html?id=${projectId}`;
+  }
+
+  function deleteProject(projectId, projectTitle) {
+    if (confirm(`Are you sure you want to delete the project "${projectTitle}"?\nThis will also delete all associated tasks.`)) {
+      axios.delete(`http://127.0.0.1:8000/api/projects/${projectId}`)
+        .then(response => {
+          alert('Project deleted successfully.');
+          loadProjects();
+        })
+        .catch(error => {
+          console.error('Error deleting project:', error);
+          alert('Failed to delete project. Please try again.');
+        });
+    }
+  }
+
+  loadProjects();
+</script>
+
+</body>
+</html>

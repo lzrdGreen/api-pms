@@ -1,0 +1,30 @@
+{% extends 'manager/base.html' %}
+
+{% block title %}{{ project.title }} Project Details{% endblock %}
+
+{% block content %}
+    <h1>{{ project.title }}</h1>
+    <p>Description: {{ project.description }}</p>
+    <p>Created at: {{ project.created_at }}</p>
+    <button type="button" onclick="location.href='{% url 'project_edit' id=project.id %}';">Edit Project</button>
+    <button type="button" onclick="location.href='{% url 'project_list' %}';">Project List</button>
+
+    <h2>Tasks</h2>
+    <ul>
+        {% for task in project.tasks.all %}
+            <li {% if task.is_overdue %}class="overdue-task"{% endif %}>
+            <div class="task-entry">
+                <a href="{% url 'task_detail' task_id=task.id %}">{{ task.title }}</a>
+                {% if task.is_overdue %}
+                    <span class="overdue-warning">(Overdue)</span>
+                {% endif %}
+                <button type="button" onclick="location.href='{% url 'task_edit' task_id=task.id %}';">Edit Task</button>
+                <button type="button" onclick="location.href='{% url 'task_delete' task_id=task.id %}';">Delete Task</button>
+            </div>
+            </li>
+        {% empty %}
+            <li>No tasks found.</li>
+        {% endfor %}
+    </ul>
+    <button type="button" onclick="location.href='{% url 'task_create' project_id=project.id %}';">Add New Task</button>    
+{% endblock %}
