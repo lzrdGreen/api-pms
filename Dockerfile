@@ -27,3 +27,4 @@ RUN pip install gunicorn
 
 # Development CMD (can override in prod)
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+#CMD ["gunicorn", "api_pms.wsgi:application", "--bind", "0.0.0.0:8000"]
