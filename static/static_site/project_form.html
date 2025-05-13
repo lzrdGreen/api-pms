@@ -50,7 +50,9 @@
   const messageDiv = document.getElementById('message');
   const formTitle = document.getElementById('form-title');
   const submitBtn = document.getElementById('submit-btn');
-  const baseUrl = window.location.origin;
+  //const baseUrl = window.location.origin;
+  const baseUrl = window.location.origin.includes('http') ? window.location.origin : 'http://18.171.185.58:8000';
+
 
   // If editing, fetch existing project details
   if (projectId) {

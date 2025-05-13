@@ -42,7 +42,9 @@
 <script>
 const params = new URLSearchParams(window.location.search);
 const projectId = params.get('id');
-const baseUrl = window.location.origin;
+//const baseUrl = window.location.origin;
+const baseUrl = window.location.origin.includes('http') ? window.location.origin : 'http://18.171.185.58:8000';
+
 
 if (!projectId) {
     alert('No project ID specified!');

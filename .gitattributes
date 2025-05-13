@@ -1,5 +1,6 @@
 # Always use LF (Unix-style) line endings
 * text=auto eol=lf
+* text=auto
 
 # Mark shell scripts explicitly
 *.sh text eol=lf
