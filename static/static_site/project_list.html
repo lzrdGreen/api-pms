@@ -37,11 +37,12 @@
 
 <script>
   const container = document.getElementById('projects-container');
+  const baseUrl = window.location.origin;
 
   function loadProjects() {
     container.innerHTML = '<p>Loading projects...</p>';
 
-    axios.get('http://127.0.0.1:8000/api/projects/')
+    axios.get(`${baseUrl}/api/projects/`)
       .then(response => {
         const projects = response.data;
         if (projects.length === 0) {
@@ -109,7 +110,7 @@
 
   function deleteProject(projectId, projectTitle) {
     if (confirm(`Are you sure you want to delete the project "${projectTitle}"?\nThis will also delete all associated tasks.`)) {
-      axios.delete(`http://127.0.0.1:8000/api/projects/${projectId}`)
+      axios.delete(`${baseUrl}/api/projects/${projectId}`)      
         .then(response => {
           alert('Project deleted successfully.');
           loadProjects();

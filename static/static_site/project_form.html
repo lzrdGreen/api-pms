@@ -50,12 +50,13 @@
   const messageDiv = document.getElementById('message');
   const formTitle = document.getElementById('form-title');
   const submitBtn = document.getElementById('submit-btn');
+  const baseUrl = window.location.origin;
 
   // If editing, fetch existing project details
   if (projectId) {
     formTitle.textContent = 'Edit Project';
     submitBtn.textContent = 'Save Changes';
-    axios.get(`http://127.0.0.1:8000/api/projects/${projectId}`)
+    axios.get(`${baseUrl}/api/projects/${projectId}`)
       .then(response => {
         document.getElementById('title').value = response.data.title;
         document.getElementById('description').value = response.data.description;
@@ -79,8 +80,8 @@
     const payload = { title, description };
 
     const request = projectId
-      ? axios.patch(`http://127.0.0.1:8000/api/projects/${projectId}`, payload)
-      : axios.post('http://127.0.0.1:8000/api/projects/', payload);
+      ? axios.patch(`${baseUrl}/api/projects/${projectId}`, payload)
+      : axios.post(`${baseUrl}/api/projects/`, payload);
 
     request.then(response => {
       messageDiv.innerHTML = '<p style="color: green;">Project saved successfully! Redirecting...</p>';
