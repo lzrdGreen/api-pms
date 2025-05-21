@@ -6,3 +6,4 @@ sqlparse==0.5.3; python_version >= '3.8'
 typing-extensions==4.13.2; python_version >= '3.8'
 tzdata==2025.2; python_version >= '2'
 whitenoise==6.9.0; python_version >= '3.9'
+django-cors-headers
