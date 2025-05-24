@@ -9,6 +9,7 @@ djangorestframework = "*"
 whitenoise = "*"
 python-dotenv = "*"
 django-cors-headers = "*"
+mysqlclient = "*"
 
 [dev-packages]
 
