@@ -1,10 +1,9 @@
-# api-pms
+# Django REST Framework Project Management API
+A Minimum Viable Product for a project management system, featuring a robust Django REST Framework API and multiple access methods.
 
-## Links to the app:
+## api-pms
 
-
-
-## links to the back-up app:
+### Links to the app:
 It can be accessed through three distinct methods, starting with the primary user interfaces:
 
 * A functional **static website** serving as a Minimum Viable Product (MVP) demonstrating real-world implementation via Axios requests: [http://3.10.64.252:8000/static/static_site/index.html]
@@ -14,3 +13,6 @@ Additionally, for those familiar with API tools (like Postman, Insomnia, or cURL
 
 * [Projects Endpoint](http://3.10.64.252:8000/api/projects/)
 * [Tasks Endpoint](http://3.10.64.252:8000/api/tasks/)
+
+### Technologies Used:
+Django, Django REST Framework, Docker, AWS RDS (MySQL), Axios.
